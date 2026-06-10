@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Engine · RWTH Grind</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #0a0b0e;
+  --card: #111318;
+  --card2: #181b22;
+  --border: #222530;
+  --border2: #2a2e3d;
+  --green: #3ecf8e;
+  --blue: #4f8ef7;
+  --orange: #ff7043;
+  --yellow: #f5c842;
+  --purple: #9b7ff4;
+  --matcha: #7cb87c;
+  --text: #e2e5f0;
+  --muted: #5a5f74;
+  --muted2: #7a8099;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; min-height: 100vh; }
+a { color: inherit; text-decoration: none; }
+
+/* ─── HERO ─── */
+.hero {
+  padding: 32px 20px 24px;
+  background: linear-gradient(160deg, #0d1020 0%, #0a0b0e 70%);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 220px; height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(79,142,247,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  color: var(--blue);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.hero h1 {
+  font-size: clamp(24px, 7vw, 38px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+.hero h1 em { font-style: normal; color: var(--green); }
+.hero-sub { font-size: 13px; color: var(--muted2); margin-bottom: 18px; line-height: 1.5; }
+
+.pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+.pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  border: 1px solid var(--border2);
+  color: var(--muted2);
+  background: var(--card);
+}
+.pill.hot { border-color: rgba(255,112,67,.3); color: var(--orange); background: rgba(255,112,67,.07); }
+.pill.go  { border-color: rgba(62,207,142,.3); color: var(--green); background: rgba(62,207,142,.07); }
+
+.countdown-strip {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.cdown {
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  flex: 1;
+  min-width: 120px;
+}
+.cdown-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--yellow);
+  line-height: 1;
+}
+.cdown-label { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+/* ─── TABS ─── */
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 14px 14px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  padding: 9px 15px 11px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all .2s;
+  background: transparent;
+  border-radius: 0;
+}
+.tab.active { color: var(--text); border-bottom-color: var(--blue); }
+.tab:hover:not(.active) { color: var(--muted2); }
+
+/* ─── CONTENT ─── */
+.content { display: none; padding: 18px 16px 48px; max-width: 680px; margin: 0 auto; }
+.content.active { display: block; }
+
+.section-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin: 22px 0 10px;
+}
+.section-title:first-child { margin-top: 0; }
+
+.banner {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--blue);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--muted2);
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+.banner strong { color: var(--text); }
+.banner.warn { border-left-color: var(--yellow); }
+.banner.success { border-left-color: var(--green); }
+
+/* ─── DAILY BLOCKS ─── */
+.day-block {
+  display: flex;
+  gap: 0;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-bottom: 8px;
+  transition: border-color .15s;
+}
+.day-block:hover { border-color: var(--border2); }
+.day-block.anchor { border-color: rgba(79,142,247,.35); }
+.day-block.anchor .db-time { background: rgba(79,142,247,.08); }
+.day-block.anchor .db-body { border-left: 2px solid var(--blue); }
+.day-block.matcha-block { border-color: rgba(124,184,124,.3); }
+.day-block.matcha-block .db-time { background: rgba(124,184,124,.07); }
+.day-block.matcha-block .db-body { border-left: 2px solid var(--matcha); }
+
+.db-time {
+  background: var(--card2);
+  border-right: 1px solid var(--border);
+  padding: 12px 8px;
+  min-width: 66px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.5;
+  text-align: center;
+}
+.db-body { background: var(--card); padding: 12px 14px; flex: 1; }
+.db-title {
+  font-weight: 600;
+  font-size: 13.5px;
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  line-height: 1.3;
+}
+.db-desc { font-size: 12.5px; color: var(--muted2); line-height: 1.55; }
+.db-desc strong { color: var(--text); }
+
+.badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 100px;
+  font-weight: 500;
+  letter-spacing: .3px;
+  white-space: nowrap;
+}
+.b-anchor  { background: rgba(79,142,247,.15);  color: var(--blue); }
+.b-study   { background: rgba(155,127,244,.15); color: var(--purple); }
+.b-food    { background: rgba(255,112,67,.15);  color: var(--orange); }
+.b-rest    { background: rgba(62,207,142,.15);  color: var(--green); }
+.b-matcha  { background: rgba(124,184,124,.15); color: var(--matcha); }
+.b-mind    { background: rgba(245,200,66,.15);  color: var(--yellow); }
+.b-nptel   { background: rgba(155,127,244,.2);  color: #c4b0ff; }
+
+/* ─── STUDY PHASES ─── */
+.subject-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.subj-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.subj-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 15px;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid transparent;
+  transition: background .15s;
+}
+.subj-card.open .subj-header { border-bottom-color: var(--border); background: var(--card2); }
+.subj-name { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.subj-meta { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+.subj-body { display: none; padding: 14px 15px; }
+.subj-card.open .subj-body { display: block; }
+.chevron { color: var(--muted); font-size: 12px; transition: transform .2s; }
+.subj-card.open .chevron { transform: rotate(180deg); }
+
+.plan-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.plan-phase-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+  padding-top: 2px;
+  min-width: 56px;
+}
+.plan-phase-body { color: var(--muted2); }
+.plan-phase-body strong { color: var(--text); }
+
+.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.dot-green  { background: var(--green); }
+.dot-yellow { background: var(--yellow); }
+.dot-orange { background: var(--orange); }
+.dot-blue   { background: var(--blue); }
+
+/* exam date badge */
+.exam-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: rgba(245,200,66,.12);
+  color: var(--yellow);
+  border: 1px solid rgba(245,200,66,.2);
+}
+.prereq-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: rgba(62,207,142,.1);
+  color: var(--green);
+  border: 1px solid rgba(62,207,142,.2);
+}
+
+/* ─── MEAL PLAN ─── */
+.meal-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; overflow: hidden; }
+.meal-header { display: flex; justify-content: space-between; align-items: center; padding: 13px 15px; cursor: pointer; user-select: none; }
+.meal-card.open .meal-header { border-bottom: 1px solid var(--border); background: var(--card2); }
+.meal-title { font-weight: 700; font-size: 13.5px; }
+.meal-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.meal-body { display: none; padding: 14px 15px; }
+.meal-card.open .meal-body { display: block; }
+
+.meal-row { display: grid; grid-template-columns: 70px 1fr; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.meal-row:last-child { border-bottom: none; }
+.meal-lbl { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); padding-top: 2px; }
+.meal-name { font-weight: 600; font-size: 13px; margin-bottom: 3px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.meal-detail { font-size: 12px; color: var(--muted2); line-height: 1.5; }
+.batch-tag { font-size: 9px; font-family: 'JetBrains Mono', monospace; background: rgba(62,207,142,.12); color: var(--green); border-radius: 4px; padding: 1px 6px; }
+
+/* ─── RULES ─── */
+.rule {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 13px 14px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.rule-icon { font-size: 18px; flex-shrink: 0; padding-top: 1px; }
+.rule-title { font-weight: 700; font-size: 13px; margin-bottom: 3px; }
+.rule-body { font-size: 12.5px; color: var(--muted2); line-height: 1.5; }
+
+/* ─── TIMELINE visual ─── */
+.exam-timeline { position: relative; padding-left: 16px; }
+.exam-timeline::before {
+  content: '';
+  position: absolute;
+  left: 5px; top: 6px; bottom: 6px;
+  width: 2px;
+  background: var(--border2);
+  border-radius: 2px;
+}
+.et-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; position: relative; }
+.et-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 3px;
+  position: relative;
+  left: -11px;
+  margin-right: -11px;
+  border: 2px solid var(--bg);
+}
+.et-body { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 13px; flex: 1; }
+.et-date { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); margin-bottom: 3px; }
+.et-name { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+.et-note { font-size: 11.5px; color: var(--muted2); }
+.et-urgent { border-color: rgba(245,200,66,.3); }
+.et-prereq { border-color: rgba(62,207,142,.25); }
+
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">MSc Automotive · RWTH Aachen</div>
+  <h1>Your <em>Grind Engine</em></h1>
+  <p class="hero-sub">27 credits · 5 graded exams · 1.0 is the target.<br>Built around how your brain actually works.</p>
+
+  <div class="pills">
+    <div class="pill">ICDM · MDORS · SDV · AE3 · AE Practical</div>
+    <div class="pill go">🍵 Matcha in the morning</div>
+    <div class="pill hot">Aug 5 · AUDHD Assessment</div>
+  </div>
+
+  <div class="countdown-strip">
+    <div class="cdown">
+      <div class="cdown-val" id="days-icdm">—</div>
+      <div class="cdown-label">days → ICDM<br><span style="color:var(--muted);font-size:10px">Aug 18 · first big exam</span></div>
+    </div>
+    <div class="cdown">
+      <div class="cdown-val" id="days-today">—</div>
+      <div class="cdown-label">days to grind<br><span style="color:var(--muted);font-size:10px">from today, Jun 10</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="showTab('day',this)">☀️ Daily</div>
+  <div class="tab" onclick="showTab('subjects',this)">📚 Subjects</div>
+  <div class="tab" onclick="showTab('exams',this)">📅 Exam Dates</div>
+  <div class="tab" onclick="showTab('meals',this)">🍗 Meals</div>
+  <div class="tab" onclick="showTab('rules',this)">⚡ Rules</div>
+</div>
+
+<!-- ════ DAILY TAB ════ -->
+<div class="content active" id="tab-day">
+
+  <div class="banner success">
+    <strong>4 anchor blocks</strong> keep this system running even on broken days. They're marked in blue. Protect them above everything else.
+  </div>
+
+  <div class="section-title">Morning Engine</div>
+
+  <div class="day-block anchor">
+    <div class="db-time">06:00<br>↓<br>06:15</div>
+    <div class="db-body">
+      <div class="db-title"><span class="badge b-anchor">ANCHOR</span> Wake up · don't negotiate</div>
+      <div class="db-desc">Alarm goes off. Sit up. Drink full glass of water immediately. Open curtains. <strong>No phone for first 10 minutes.</strong> This single habit changes the whole day.</div>
+    </div>
+  </div>
+
+  <div class="day-block matcha-block">
+    <div class="db-time">06:15<br>↓<br>06:45</div>
+    <div class="db-body">
+      <div class="db-title"><span class="badge b-matcha">MATCHA</span> Matcha prep + meditation</div>
+      <div class="db-desc"><strong>This is your ignition ritual.</strong> Boil water (80°C, not boiling), sift matcha, whisk 30–40 sec until frothy. While it cools slightly — 10 min meditation. Sit, eyes closed, just follow breath. Headspace/Waking Up or just a timer. Matcha gives calm alertness (L-theanine + caffeine = no crash). <strong>Drink while sitting, not rushing.</strong></div>
+    </div>
+  </div>
+
+  <div class="day-block">
+    <div class="db-time">06:45<br>↓<br>07:10</div>
+    <div class="db-body">
+      <div class="db-title"><span class="badge b-food">FOOD</span> Breakfast · zero decisions</div>
+      <div class="db-desc">Decided the night before. Eggs + toast, overnight oats, or reheat batch food. <strong>Eat at the table, not the desk.</strong> 5 min after eating: brush teeth, get dressed.</div>
+    </div>
+  </div>
+
+  <div class="day-block anchor">
+    <div class="db-time">07:10<br>↓<br>07:20</div>
+    <div class="db-body">
+      <div class="db-title"><span class="badge b-anchor">ANCHOR</span> 10-min daily plan</div>
+      <div class="db-desc">Open notebook. Write: <strong>(1) Which subject — NPTEL or slides (2) Which topic exactly (3) What meal today.</strong> Done. Day is decided. No mid-day paralysis.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Morning Study (your sharpest window)</div>
+
+  <div class="day-block anchor">
+    <div class="db-time">07:20<br>↓<br>09:20</div>
+    <div class="db-body">
+      <div class="db-title"><span class="badge b-nptel">NPTEL</span> Foundation Block · NPTEL / IIT lectures</div>
+      <div class="db-desc"><strong>First priority every morning until foundation is solid.</strong> Watch at 1.25–1.5x. Pause and redo derivations yourself on paper — don't just watch. When a concept clicks, move on. Use this window for ICDM + MDORS foundation first (your Aug 18 exam). 50 min on · 10 min off.</div>
+    </div>
+  </div>
+
+  <div class="day-block">
+    <div class="db-time">09:20<br>↓<br>09:40</div>
+    <div class="db-body">
+      <div class="db-title"><span class="badge b-rest">BREAK</span> Move · water · outside if possible</div>
+      <div class="db-desc">Walk around. Stretch. No YouTube spirals. Timer set for 20 min. This break is what makes Block 2 possible.</div>
+    </div>
+  </div>
+
+  <div class="day-block">
+    <div class="db-time">09:40<br>↓<br>11:40</div>
+    <div class="db-body">
+      <div class="db-title"><span class="badge b-study">STUDY</span> Lecture Slides Block · one subject</div>
+      <div class="db-desc">Go through lecture slides for the same topic you just built foundation on. <strong>Don't copy slides — translate into your own words.</strong> If NPTEL covered it: slides will feel fast. If stuck on a slide: go back to first principles in your notes, 5 min max, then move on. 50 min on · 10 min off.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Midday</div>
+
+  <div class="day-block">
+    <div class="db-time">11:40<br>↓<br>12:20</div>
+    <div class="db-body">
+      <div class="db-title"><span class="badge b-food">LUNCH</span> Batch meal · away from desk</div>
+      <div class="db-desc">Heat batch food (2 min microwave). Eat at table. No screens. 5–10 min sit after eating. Let brain consolidate the morning session — this is not wasted time.</div>
+    </div>
+  </div>
+
+  <div class="day-block">
+    <div class="db-time">12:20<br>↓<br>13:00</div>
+    <div class="db-body">
+      <div class="db-title"><span class="badge b-mind">REST</span> Nap or light walk</div>
+      <div class="db-desc">Optional 20-min nap (set alarm). Or walk outside, lie down, music. <strong>Do not start another topic here.</strong> Brain needs to consolidate what it learned. This makes the afternoon block 40% more effective.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Afternoon Study</div>
+
+  <div class="day-block">
+    <div class="db-time">13:00<br>↓<br>15:00</div>
+    <div class="db-body">
+      <div class="db-title"><span class="badge b-study">PROBLEMS</span> Past papers · worked examples</div>
+      <div class="db-desc">Afternoon brain = problem-solving mode, not reading. Grab past exam questions for today's topic. Try them. Get stuck — good. Work through it. <strong>This is where 1.0 is built.</strong> One hour per subject if rotating two.</div>
+    </div>
+  </div>
+
+  <div class="day-block">
+    <div class="db-time">15:00<br>↓<br>15:20</div>
+    <div class="db-body">
+      <div class="db-title"><span class="badge b-food">SNACK</span> Break + snack</div>
+      <div class="db-desc">Fruit, nuts, yogurt, batch leftovers. Hydrate. Get up fully. Protects Block 4.</div>
+    </div>
+  </div>
+
+  <div class="day-block">
+    <div class="db-time">15:20<br>↓<br>17:00</div>
+    <div class="db-body">
+      <div class="db-title"><span class="badge b-study">REVIEW</span> Consolidation · summary sheets</div>
+      <div class="db-desc">Write summary of today's topic in your own words. Draw diagrams. Make 5–10 flashcards. <strong>This is the step most students skip — and why they forget everything.</strong> 1 hr 40 min. Do it.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Evening</div>
+
+  <div class="day-block anchor">
+    <div class="db-time">17:00<br>↓<br>18:30</div>
+    <div class="db-body">
+      <div class="db-title"><span class="badge b-food">ANCHOR</span> Batch cook window · Tue + Fri only</div>
+      <div class="db-desc"><strong>Cooking is ONLY here, ONLY Tuesday and Friday evenings.</strong> Never during study hours. This is the rule that stops 3-hour food chaos. Podcast or music on. Cook for 2–3 days. See Meals tab.</div>
+    </div>
+  </div>
+
+  <div class="day-block">
+    <div class="db-time">17:00<br>↓<br>18:00</div>
+    <div class="db-body">
+      <div class="db-title"><span class="badge b-study">LIGHT</span> Flashcard review · Mon/Wed/Thu/Sat only</div>
+      <div class="db-desc">(On non-cooking days.) Anki flashcards, re-read summary sheets, watch one lecture clip at 1.5x. Low intensity. Brain tired — don't push derivations now.</div>
+    </div>
+  </div>
+
+  <div class="day-block">
+    <div class="db-time">18:00<br>↓<br>19:30</div>
+    <div class="db-body">
+      <div class="db-title"><span class="badge b-rest">FREE</span> Fully off · protect this</div>
+      <div class="db-desc">Call family, watch something, go outside, whatever you enjoy. <strong>This is not optional recovery — it's what makes tomorrow possible.</strong></div>
+    </div>
+  </div>
+
+  <div class="day-block anchor">
+    <div class="db-time">19:30<br>↓<br>20:00</div>
+    <div class="db-body">
+      <div class="db-title"><span class="badge b-anchor">ANCHOR</span> Wind-down ritual</div>
+      <div class="db-desc">Prepare tomorrow's breakfast (overnight oats or set out eggs). Write 3 topi
